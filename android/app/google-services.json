@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "570346577173",
+    "firebase_url": "https://room-control-6972b.firebaseio.com",
+    "project_id": "room-control-6972b",
+    "storage_bucket": "room-control-6972b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:570346577173:android:61a694440219fe13651d1c",
+        "android_client_info": {
+          "package_name": "com.shreyas.roomcontrol"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "570346577173-953v0fj0co89b3lvqc9db1bafh3hoj8v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyQhG0jscyFDtpxFknt8OZiYlgUjU1xoE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "570346577173-953v0fj0co89b3lvqc9db1bafh3hoj8v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
