@@ -29,12 +29,12 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
-    - assets/images/Mask Group 1.png
-    - assets/images/Icon feather-user.png
-    - assets/images/Icon feather-lock.png
-    - assets/images/Mask Group -1.png
-    - assets/images/Group 62.png
-    - assets/images/Icon feather-mail.png
+    # - assets/images/Mask Group 1.png
+    # - assets/images/Icon feather-user.png
+    # - assets/images/Icon feather-lock.png
+    # - assets/images/Mask Group -1.png
+    # - assets/images/Group 62.png
+    # - assets/images/Icon feather-mail.png
   fonts:
     - family: DejaVu Sans
       fonts:
