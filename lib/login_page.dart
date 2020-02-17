@@ -1,11 +1,19 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:roomcontrol/control_panel.dart';
+// import 'package:roomcontrol/loading_page.dart';
+// import 'package:roomcontrol/main.dart';
 import 'package:roomcontrol/signup_page.dart';
-import 'package:simple_animations/simple_animations.dart';
+import 'widgets/form_submit_btn.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'validators.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
 
 
-class LoginPageUI extends StatefulWidget {
+
+class LoginPageUI extends StatefulWidget with EmailPasswordProviders{
 
   static String id = 'loginpage';
 
@@ -15,19 +23,78 @@ class LoginPageUI extends StatefulWidget {
 
 class _LoginPageUIState extends State<LoginPageUI> {
 
-  // ScreenUtil screenutil;
+  final _auth = FirebaseAuth.instance;
+
+  final _loginscaffoldkey = GlobalKey<ScaffoldState>();
+  
+   final TextEditingController textnamecontroller = TextEditingController();
+   final TextEditingController passwordcontroller = TextEditingController();
+   String get _email => textnamecontroller.text;
+   String get _password => passwordcontroller.text;
+    bool emailValid = true;
+
+    bool passwordValid =true;
+
   @override
   void initState() {
-    // screenutil = ScreenUtil();
+    // 
+    // LoadingScreen(duration: Duration(seconds: 5),pagenavigate: LoginPageUI.id);
     super.initState();
   }
 
+  
+
+  _submit() async {
+
+    var dontproceed = true;
+
+    if(_email == '' || _email == null ){
+      setState(() {
+        emailValid = false;
+      });
+      
+      dontproceed =false;
+
+    }
+    if( _password == '' || _password == null ){
+       setState(() {
+        passwordValid = false;
+      });
+     dontproceed =false;
+    }
+   if(dontproceed){
+
+      try{
+
+      final existinguser = await _auth.signInWithEmailAndPassword(email: _email, password: _password);
+      print(existinguser);
+
+      if(existinguser.user != null){
+
+        //  LoadingScreen(duration: Duration(seconds: 5),pagenavigate:ControlPanel.id);
+        Navigator.pushNamed(context, ControlPanel.id);
+
+      }
+        }catch(e){
+          showSnackBar(e);
+          print(e);
+
+        }
+    } 
+  // print('email = ${textnamecontroller.text} , password = ${passwordcontroller.text}');
+
+}
+
   @override
   Widget build(BuildContext context) {
-
+    
     ScreenUtil.init(context, width: 360, height: 720, allowFontScaling: false);
 
-    return Scaffold(
+    //  emailValid = widget.emailValidator.isValid(_email);
+    //  passwordValid = widget.passwordValidator.isValid(_password);
+
+      return Scaffold(
+        key: _loginscaffoldkey,
         backgroundColor: Color(0xfffffff),
         body: SingleChildScrollView(
           child: Container(
@@ -48,11 +115,9 @@ class _LoginPageUIState extends State<LoginPageUI> {
                     fit: BoxFit.fill,
                   ),
                 ),
-                // color: Color(0xff042c38),
-                // child: Image.asset('assets/images/Mask Group 1.png',fit: BoxFit.fill,filterQuality: FilterQuality.high,),
+          
               ),
               Positioned(
-                // duration: Duration(seconds:5),
                 bottom: ScreenUtil().setWidth(0.0),
                 child: 
               Column(
@@ -101,15 +166,25 @@ class _LoginPageUIState extends State<LoginPageUI> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: <Widget>[
-                            Icon(Icons.group),
-                            // SvgPicture.asset('assets/images/user.svg'),
+                              // Icon(Icons.group),
+                              Image.asset('assets/images/Icon feather-user.png'),
                               Padding(
                                 padding: EdgeInsets.only(left:ScreenUtil().setWidth(32.0)),
                                 child: SizedBox(
                                   width: ScreenUtil().setWidth(230),
                                   child: TextField(
+                                    onChanged: (val){
+                                      if(val != ''){
+                                        setState(() {
+                                          emailValid = true;
+                                        });
+                                      }
+                                    },
+                                    controller: textnamecontroller,
+                                    keyboardType: TextInputType.emailAddress,
                                     decoration: InputDecoration(
                                     hintText: 'Username',
+                                    errorText: emailValid ? null :  widget.emailerror,
                                       hintStyle: TextStyle(
                                         color: Colors.black45,
                                       ),
@@ -123,14 +198,25 @@ class _LoginPageUIState extends State<LoginPageUI> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: <Widget>[
-                              Icon(Icons.lock),
+                              // Icon(Icons.lock),
+                              Image.asset('assets/images/Icon feather-lock.png'),
                               Padding(
                                 padding: EdgeInsets.only(left:ScreenUtil().setWidth(32.0)),
                                 child: SizedBox(
                                   width: ScreenUtil().setWidth(230),
                                   child: TextField(
+                                    onChanged: (val){
+                                    if(val != ''){
+                                        setState(() {
+                                          passwordValid = true;
+                                        });
+                                      }
+                                    },
+                                    keyboardType: TextInputType.text,
+                                    controller: passwordcontroller,
                                     obscureText: true,
                                     decoration: InputDecoration(
+                                    errorText: passwordValid ? null : widget.passwordError,
                                     hintText: 'Password',
                                       hintStyle: TextStyle(
                                         color: Colors.black45,
@@ -142,29 +228,7 @@ class _LoginPageUIState extends State<LoginPageUI> {
                               
                             ],
                           ),
-                          Container(
-                            height: ScreenUtil().setHeight(60.0),
-                            width: ScreenUtil().setWidth(300),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.rectangle,
-                              color: Color(0xff00a79b),
-                              borderRadius: BorderRadius.all(Radius.circular(ScreenUtil().setWidth(5.0))),
-                            ),
-                              child: Material(
-                                color: Colors.transparent,
-                              child: InkWell(
-                                splashColor: Colors.grey,
-                                child: Center(child: Text('SIGN IN',style: TextStyle(
-                                  color:Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: ScreenUtil().setSp(24.0),
-                                  letterSpacing: ScreenUtil().setWidth(3.0),
-                                    ),
-                                  ),
-                            ),
-                              ),
-                              ),
-                          ),
+                          FormSubmitButton(buttonType: 'SIGN IN',onPressed: _submit,),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -203,4 +267,19 @@ class _LoginPageUIState extends State<LoginPageUI> {
         ),
     );
   }
+
+
+ void showSnackBar(text){
+
+      final snackbar = SnackBar(
+        backgroundColor: Color(0xFF00a79b),
+      content: Text(
+          text,
+          style: TextStyle(color:Colors.white,),
+        ),
+      );
+    _loginscaffoldkey.currentState.showSnackBar(snackbar);
+
+  }
 }
+

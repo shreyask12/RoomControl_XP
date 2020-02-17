@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:roomcontrol/control_panel.dart';
+// import 'package:roomcontrol/loading_page.dart';
+// import 'package:roomcontrol/control_panel.dart';
 import 'package:roomcontrol/login_page.dart';
+import 'package:roomcontrol/validators.dart';
+import 'widgets/form_submit_btn.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class SignupUI extends StatefulWidget {
+class SignupUI extends StatefulWidget with EmailPasswordProviders{
 
   static String id = 'signup';
 
@@ -13,7 +18,75 @@ class SignupUI extends StatefulWidget {
 }
 
 class _SignupUIState extends State<SignupUI> {
+
+  final _auth = FirebaseAuth.instance;
+
+  final _signupScaffold = GlobalKey<ScaffoldState>();
+
+  final TextEditingController textnamecontrol = TextEditingController();
+  final TextEditingController emailcontrol = TextEditingController();
+  final TextEditingController passwordcontrol = TextEditingController();
+
+   String get _email => emailcontrol.text;
+   String get _password => passwordcontrol.text;
+   String get _username => textnamecontrol.text;
+
+    bool emailValid =true;
+    bool passwordValid = true;
+    bool usernamevalid = true;
+
+  bool checkboxchecked = false;
   
+
+  _onSubmit() async {
+    var dontproceed = true;
+
+    if(_email == '' || _email == null ){
+      setState(() {
+        emailValid = false;
+      });
+      
+      dontproceed =false;
+
+    }
+    if( _password == '' || _password == null ){
+       setState(() {
+        passwordValid = false;
+      });
+     dontproceed =false;
+    }
+    if(_username == '' || _username == null){
+       setState(() {
+        usernamevalid = false;
+      });
+       dontproceed =false;
+    }
+    if(checkboxchecked == false){
+
+       dontproceed = false;
+       showSnackBar('Please Accept the terms and conditions!');
+    
+    }
+    if(dontproceed){
+
+      try{
+
+      final newuser = await _auth.createUserWithEmailAndPassword(email: _email, password: _password);
+      //  print(newuser);
+
+      if(newuser != null){
+
+        //  LoadingScreen(duration: Duration(seconds:5 ),pagenavigate: ControlPanel.id,);
+        Navigator.pushNamed(context, ControlPanel.id);
+      }
+        }catch(e){
+          showSnackBar(e);
+          print(e);
+        }
+
+    }
+
+  }
   
 
   @override
@@ -21,7 +94,12 @@ class _SignupUIState extends State<SignupUI> {
 
     ScreenUtil.init(context, width: 360, height: 720, allowFontScaling: false);
 
+    // emailValid = widget.emailValidator.isValid(_email);
+    // passwordValid = widget.passwordValidator.isValid(_password);
+    // usernamevalid = widget.emailValidator.isValid(_username);
+
     return Scaffold(
+      key: _signupScaffold,
       backgroundColor: Color(0xffffff),
       body: SingleChildScrollView(
         child: Container(
@@ -107,15 +185,25 @@ class _SignupUIState extends State<SignupUI> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: <Widget>[
-                              Icon(Icons.group),
+                              // Icon(Icons.group),
+                              Image.asset('assets/images/Icon feather-user.png'),
                               // SvgPicture.asset('assets/images/user.svg'),
                                 Padding(
                                   padding: EdgeInsets.only(left:ScreenUtil().setWidth(32.0)),
                                   child: SizedBox(
                                     width: ScreenUtil().setWidth(230),
                                     child: TextField(
+                                      controller: textnamecontrol,
+                                       onChanged: (val){
+                                          if(val != ''){
+                                          setState(() {
+                                            usernamevalid = true;
+                                          });
+                                        }
+                                       },
                                       decoration: InputDecoration(
                                       hintText: 'Username',
+                                      errorText: usernamevalid ? null : widget.usernameError,
                                         hintStyle: TextStyle(
                                           color: Colors.black45,
                                         ),
@@ -129,15 +217,25 @@ class _SignupUIState extends State<SignupUI> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: <Widget>[
-                                Icon(Icons.lock),
+                                // Icon(Icons.lock),
+                                Image.asset('assets/images/Icon feather-lock.png'),
                                 Padding(
                                   padding: EdgeInsets.only(left:ScreenUtil().setWidth(32.0)),
                                   child: SizedBox(
                                     width: ScreenUtil().setWidth(230),
                                     child: TextField(
+                                       onChanged: (val){
+                                          if(val != ''){
+                                          setState(() {
+                                            passwordValid = true;
+                                          });
+                                        }
+                                       },
+                                      controller: passwordcontrol,
                                       obscureText: true,
                                       decoration: InputDecoration(
                                       hintText: 'Password',
+                                      errorText: passwordValid ? null : widget.passwordError,
                                         hintStyle: TextStyle(
                                           color: Colors.black45,
                                         ),
@@ -151,15 +249,25 @@ class _SignupUIState extends State<SignupUI> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: <Widget>[
-                                Icon(Icons.email),
+                                // Icon(Icons.email),
+                                Image.asset('assets/images/Icon feather-mail.png'),
                                 Padding(
                                   padding: EdgeInsets.only(left:ScreenUtil().setWidth(32.0)),
                                   child: SizedBox(
                                     width: ScreenUtil().setWidth(230),
                                     child: TextField(
-                                      obscureText: true,
+                                      controller: emailcontrol,
+                                      onChanged: (val){
+                                          if(val != ''){
+                                          setState(() {
+                                            emailValid = true;
+                                          });
+                                        }
+                                       },
+                                      keyboardType: TextInputType.emailAddress,
                                       decoration: InputDecoration(
                                       hintText: 'Email',
+                                      errorText: emailValid ? null :  widget.emailerror,
                                         hintStyle: TextStyle(
                                           color: Colors.black45,
                                         ),
@@ -174,8 +282,10 @@ class _SignupUIState extends State<SignupUI> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
                                 Expanded(
-                                  child: Checkbox(value: false, onChanged: (val){
-                                     
+                                  child: Checkbox(value: checkboxchecked, onChanged: (val){
+                                     setState(() {
+                                       checkboxchecked = val;
+                                     });
                                   },activeColor: Color(0xffa6a6a6),checkColor: Color(0xff00a79b),),
                                 ),
                                 Expanded(
@@ -213,35 +323,7 @@ class _SignupUIState extends State<SignupUI> {
                                 ),
                               ],
                             ),
-                            GestureDetector(
-                              onTap: (){
-                                Navigator.pushNamed(context,ControlPanel.id);
-                              },
-                              child: Container(
-                                height: ScreenUtil().setHeight(60.0),
-                                width: ScreenUtil().setWidth(300),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.rectangle,
-                                  color: Color(0xff00a79b),
-                                  borderRadius: BorderRadius.all(Radius.circular(ScreenUtil().setWidth(5.0))),
-                                ),
-                                  child: Material(
-                                    color: Colors.transparent,
-                                  child: InkWell(
-                                    splashColor: Colors.grey,
-                                    child: Center(
-                                      child: Text('SIGN UP',style: TextStyle(
-                                      color:Colors.white,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: ScreenUtil().setSp(24.0),
-                                      letterSpacing: ScreenUtil().setWidth(3.0),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
+                            FormSubmitButton(buttonType: 'SIGN UP', onPressed: _onSubmit)
                           ],
                         ),
                       ),
@@ -254,5 +336,18 @@ class _SignupUIState extends State<SignupUI> {
         ),
       ),
     );
+  }
+
+  void showSnackBar(text){
+
+      final snackbar = SnackBar(
+        backgroundColor: Color(0xFF00a79b),
+      content: Text(
+          text,
+          style: TextStyle(color:Colors.white,),
+        ),
+      );
+    _signupScaffold.currentState.showSnackBar(snackbar);
+
   }
 }

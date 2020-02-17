@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:roomcontrol/control_panel.dart';
 import 'package:roomcontrol/widgets/bulbs_box.dart';
-import 'package:roomcontrol/widgets/lamp_paint.dart';
+// import 'package:roomcontrol/widgets/lamp_paint.dart';
 
 class RoomsPage extends StatefulWidget {
 
